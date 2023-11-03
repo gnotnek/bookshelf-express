@@ -20,7 +20,7 @@ describe('Express App Handlers', () => {
           expect(res.body.status).to.equal('success');
           expect(res.body.data).to.have.property('bookId');
           done();
-        });
+        }).catch(done)
     });
   });
 
@@ -33,7 +33,7 @@ describe('Express App Handlers', () => {
           expect(res.body.status).to.equal('success');
           expect(res.body.data).to.have.property('books');
           done();
-        });
+        }).catch(done)
     });
   });
 
@@ -65,7 +65,7 @@ describe('Express App Handlers', () => {
               expect(res.body.data.book).to.have.property('year', 2023);
               expect(res.body.data.book).to.have.property('author', 'John Doe');
               done();
-            });
+            }).catch(done)
         });
     });
 
@@ -80,7 +80,7 @@ describe('Express App Handlers', () => {
 
           expect(res.body.status).to.equal('fail');
           expect(res.body.message).to.equal('Buku tidak ditemukan');
-          done();
+          done().catch(done)
         });
     });
   });
@@ -119,7 +119,7 @@ describe('Express App Handlers', () => {
               expect(res.body.data.book).to.have.property('name', 'Updated Book Title');
               expect(res.body.data.book).to.have.property('year', 2024);
               done();
-            });
+            }).catch(done)
         });
     });
 
@@ -141,7 +141,7 @@ describe('Express App Handlers', () => {
           expect(res.body.status).to.equal('fail');
           expect(res.body.message).to.equal('Gagal memperbarui buku. Id tidak ditemukan');
           done();
-        });
+        }).catch(done)
     });
   });
 
@@ -171,7 +171,7 @@ describe('Express App Handlers', () => {
               expect(res.body.status).to.equal('success');
               expect(res.body.message).to.equal('Buku berhasil dihapus');
               done();
-            });
+            }).catch(done)
         });
     });
 
@@ -187,7 +187,7 @@ describe('Express App Handlers', () => {
           expect(res.body.status).to.equal('fail');
           expect(res.body.message).to.equal('Buku gagal dihapus. Id tidak ditemukan');
           done();
-        });
+        }).catch(done)
     });
   });
 
