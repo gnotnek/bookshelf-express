@@ -1,172 +1,119 @@
-const {nanoid} = require('nanoid');
-const books = require('./books');
+const Book = require('./books');
 
-const addBookHandler = (req, res) => {
-    const {name, year, author, summary, publisher, pageCount, readPage, reading} = req.body
-
-    if(!name){
-        const response = res.status(400).json({
-            status : 'fail',
-            message : "Gagal menambahkan buku. Mohon isi nama buku"
-        })
-        return response
-    }
-
-    if(readPage > pageCount){
-        const response = res.status(400).json({
-            status : 'fail',
-            message : "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount"
-        })
-        return response
-    }
-
-    const id = nanoid(16)
-    const finished = pageCount === readPage ? true : false
-    const insertedAt = new Date().toISOString()
-    const updatedAt = insertedAt
-
-    books.push({id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt})
-
-    const isSuccess = books.filter((book) => book.id === id).length > 0
-
-    if(isSuccess){
+const addBookHandler = async (req, res) => {
+    try {
+        const newBook = new Book(req.body)
+        await newBook.save()
         const response = res.status(201).json({
             status : 'success',
-            message : "Buku berhasil ditambahkan",
-            data : {bookId : id}
+            data : {bookId : newBook.id}
+        })
+        return response
+    } catch (err) {
+        const response = res.status(400).json({
+            status : 'fail',
+            message : "Buku gagal ditambahkan"
         })
         return response
     }
-
-    const response = res.status(500).json({
-        status : 'error',
-        message : "Buku gagal ditambahkan"
-    })
-    return response
 }
 
-const getAllBooksHandler = (req, res) => {
-    const {name, reading, finished} = req.query
-
-    let filteredBooks = books
-
-    if(name !== undefined){
+const getAllBooksHandler = async (req, res) => {
+    try{
+        const books = await Book.find()
         const response = res.status(200).json({
             status : 'success',
-            data : {books : filteredBooks.filter((book) => book.name.toLowerCase().includes(name.toLowerCase())).map((book) => ({id : book.id, name : book.name, publisher : book.publisher}))}
+            data : {books}
+        })
+        return response
+    }catch(err){
+        const response = res.status(400).json({
+            status : 'fail',
+            message : "Buku gagal ditemukan"
         })
         return response
     }
-
-    if(reading !== undefined){
-        const response = res.status(200).json({
-            status : 'success',
-            data : {books : filteredBooks.filter((book) => book.reading === (reading === '1')).map((book) => ({id : book.id, name : book.name, publisher : book.publisher}))}
-        })
-        return response
-    }
-
-    if(finished !== undefined){
-        const response = res.status(200).json({
-            status : 'success',
-            data : {books : filteredBooks.filter((book) => book.finished === (finished === '1')).map((book) => ({id : book.id, name : book.name, publisher : book.publisher}))}
-        })
-        return response
-    }
-
-    const response = res.status(200).json({
-        status : 'success',
-        data : {books : filteredBooks.map((book) => ({id : book.id, name : book.name, publisher : book.publisher}))}
-    })
-    return response
 }
 
-const getBookByIdHandler = (req, res) => {
-    const {bookId} = req.params
+const getBookByIdHandler = async (req, res) => {
+    try{
+        const bookId = req.params.bookId
+        const book = await Book.findById(bookId)
 
-    const book = books.filter((book) => book.id === bookId)[0]
+        if(!book){
+            const response = res.status(404).json({
+                status : 'fail',
+                message : "Buku tidak ditemukan"
+            })
+            return response
+        }
 
-    if(book !== undefined){
         const response = res.status(200).json({
             status : 'success',
             data : {book}
         })
         return response
+    }catch(err){
+        const response = res.status(404).json({
+            status : 'fail',
+            message : "Buku tidak ditemukan"
+        })
+        return response
     }
-
-    const response = res.status(404).json({
-        status : 'fail',
-        message : "Buku tidak ditemukan"
-    })
-
-    return response
 }
 
-const editBookByIdHandler = (req, res) => {
-    const {bookId} = req.params
-    const {name, year, author, summary, publisher, pageCount, readPage, reading} = req.body
+const editBookByIdHandler = async (req, res) => {
+    try{
+        const bookId = req.params.bookId
+        const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, {new : true})
 
-    const updatedAt = new Date().toISOString()
-    const index = books.findIndex((book) => book.id === bookId)
-
-    if(index !== -1){
-        if(!name){
-            const response = res.status(400).json({
+        if(!updatedBook){
+            const response = res.status(404).json({
                 status : 'fail',
-                message : "Gagal memperbarui buku. Mohon isi nama buku"
+                message : "Gagal memperbarui buku. Id tidak ditemukan"
             })
             return response
         }
-
-        if(readPage>pageCount){
-            const response = res.status(400).json({
-                status : 'fail',
-                message : "Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount"
-            })
-            return response
-        }
-
-        const finished = pageCount === readPage ? true : false
-
-        books[index] = {...books[index], name, year, author, summary, publisher, pageCount, readPage, finished, reading, updatedAt}
 
         const response = res.status(200).json({
             status : 'success',
-            message : "Buku berhasil diperbarui"
+            data : {book : updatedBook}
         })
-
+        return response
+    }catch(err){
+        const response = res.status(404).json({
+            status : 'fail',
+            message : "Gagal memperbarui buku."
+        })
         return response
     }
-
-    const response = res.status(404).json({
-        status : 'fail',
-        message : "Gagal memperbarui buku. Id tidak ditemukan"
-    })
-    return response
 }
 
-const deleteBookByIdHandler = (req, res) => {
-    const {bookId} = req.params
+const deleteBookByIdHandler = async (req, res) => {
+    try{
+        const bookId = req.params.bookId
+        const deletedBook = await Book.findByIdAndDelete(bookId)
 
-    const index = books.findIndex((book) => book.id === bookId)
-
-    if(index !== -1){
-        books.splice(index, 1)
+        if(!deletedBook){
+            const response = res.status(404).json({
+                status : 'fail',
+                message : "Buku gagal dihapus. Id tidak ditemukan"
+            })
+            return response
+        }
 
         const response = res.status(200).json({
             status : 'success',
             message : "Buku berhasil dihapus"
         })
-
+        return response
+    }catch(err){
+        const response = res.status(404).json({
+            status : 'fail',
+            message : "Buku gagal dihapus"
+        })
         return response
     }
-
-    const response = res.status(404).json({
-        status : 'fail',
-        message : "Buku gagal dihapus. Id tidak ditemukan"
-    })
-
-    return response
 }
 
 module.exports = {addBookHandler, getAllBooksHandler, getBookByIdHandler, editBookByIdHandler, deleteBookByIdHandler}
