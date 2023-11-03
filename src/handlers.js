@@ -83,7 +83,7 @@ const editBookByIdHandler = async (req, res) => {
     }catch(err){
         const response = res.status(404).json({
             status : 'fail',
-            message : "Gagal memperbarui buku."
+            message : "Gagal memperbarui buku. Id tidak ditemukan"
         })
         return response
     }
@@ -110,7 +110,7 @@ const deleteBookByIdHandler = async (req, res) => {
     }catch(err){
         const response = res.status(404).json({
             status : 'fail',
-            message : "Buku gagal dihapus"
+            message : "Buku gagal dihapus. Id tidak ditemukan"
         })
         return response
     }
