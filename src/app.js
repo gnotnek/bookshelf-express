@@ -14,6 +14,6 @@ routes(app)
 
 module.exports = app
 
-app.listen(port, () => {
+app.listen(port, process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0' , () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
