@@ -4,6 +4,7 @@ const moongose = require('mongoose')
 
 const app = express()
 const port = 9000
+const host = process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0'
 
 const dbURL = 'mongodb://127.0.0.1:27017/bookshelf'
 moongose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -14,6 +15,6 @@ routes(app)
 
 module.exports = app
 
-app.listen(port, process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0' , () => {
+app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
