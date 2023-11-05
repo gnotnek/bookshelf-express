@@ -15,6 +15,6 @@ routes(app)
 
 module.exports = app
 
-app.listen(port, () => {
+app.listen(port, host, () => {
   console.log(`Example app listening at http://${host}:${port}`)
 })
