@@ -19,7 +19,7 @@ jobs:
         image: mongo
         ports:
           - 27017:27017
-        options: --name mongodb
+        options: --health-cmd "mongo --version" --health-interval 10s --health-timeout 5s --health-retries 5
 
     strategy:
       matrix:
